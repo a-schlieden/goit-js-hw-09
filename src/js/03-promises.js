@@ -1,53 +1,45 @@
+import Notiflix from 'notiflix';
+
 const refs = {
   formEl: document.querySelector('.form'),
   stepFieldEl: document.querySelector('input[name="step"]'),
   delayFieldEl: document.querySelector('input[name="delay"]'),
   amountFieldEl: document.querySelector('input[name="amount"]'),
-  submitBtnEl: document.querySelector('button[type="submit"]'),
 };
-
-
 
 refs.formEl.addEventListener('submit', onFormSubmit);
 
 function onFormSubmit(event) {
   event.preventDefault();
 
-  const timeBefore = refs.delayFieldEl.value;
-  console.log(timeBefore)
-  const delay = refs.stepFieldEl.value;
-  const amount = refs.amountFieldEl.value;
-  console.log(delay)
-  console.log(amount)
-  setTimeout(() => {
-    console.log('work ')
-    createPromise(amount, delay)
+  let firstDelay = Number(refs.delayFieldEl.value); //
+  let stepDelay = Number(refs.stepFieldEl.value);
+  let amount = refs.amountFieldEl.value;
+
+  for (let i = 1; i <= amount; i += 1) {
+    createPromise(i, firstDelay)
       .then(({ position, delay }) => {
-        console.log(`✅ Fulfilled promise ${position} in ${delay}ms`);
+        Notiflix.Notify.success(
+          `✅ Fulfilled promise ${position} in ${delay} ms`
+        );
       })
       .catch(({ position, delay }) => {
-        console.log(`❌ Rejected promise ${position} in ${delay}ms`);
+        Notiflix.Notify.failure(
+          `❌ Rejected promise ${position} in ${delay} ms`
+        );
       });
-
-  }, timeBefore);
+    firstDelay += stepDelay;
+  }
 }
 
-//function createPromise(position, delay) {
-//  const shouldResolve = Math.random() > 0.3;
-// if (shouldResolve) {
-// Fulfill 
-//    resolve(`✅ Fulfilled promise ${position} in ${delay}ms`);
-//  } else {
-// Reject
-//   reject(`❌ Rejected promise ${position} in ${delay}ms`);
-//  }
-//}
-
-
-//createPromise(2, 1500)
- // .then(({ position, delay }) => {
- //   console.log(`✅ Fulfilled promise ${position} in ${delay}ms`);
- // })
- // .catch(({ position, delay }) => {
-//    console.log(`❌ Rejected promise ${position} in ${delay}ms`);
- // });
+function createPromise(position, delay) {
+  return new Promise((resolve, reject) => {
+    setTimeout(() => {
+      const shouldResolve = Math.random() > 0.3;
+      if (shouldResolve) {
+        resolve({ position, delay });
+      }
+      reject({ position, delay });
+    }, delay);
+  });
+}
