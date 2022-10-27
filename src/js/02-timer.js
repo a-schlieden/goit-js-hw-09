@@ -4,20 +4,13 @@ import Notiflix from 'notiflix';
 
 Notiflix.Notify.init({
   position: 'center-top',
-  // clickToClose: true,
+  clickToClose: true,
 });
 
-const refs = {
-  daysEl: document.querySelector('.field[data-days]'),
-  hoursEl: document.querySelector('.field[data-hours]'),
-  minutesEl: document.querySelector('.field[data-minutes]'),
-  secondsEl: document.querySelector('.field[data-seconds]'),
-  startBtnEl: document.querySelector('button[data-start]'),
-  dateInput: document.querySelector('#datetime-picker'),
-};
-
-refs.startBtnEl.disabled = true;
+let getElem = selector => document.querySelector(selector);
 let intervalId = null;
+
+getElem('button[data-start]').disabled = true;
 
 const options = {
   enableTime: true,
@@ -28,45 +21,40 @@ const options = {
     if (selectedDates[0].getTime() < Date.now()) {
       Notiflix.Notify.failure('Please choose a date in the future');
     } else {
-      refs.startBtnEl.disabled = false;
+      getElem('button[data-start]').disabled = false;
     }
   },
 };
 
-const dateChoose = flatpickr(refs.dateInput, options);
+const dateChoose = flatpickr(getElem('#datetime-picker'), options);
 
 const timer = {
   isActive: false,
   start() {
-    if (this.isActive) {
-      return;
-    }
-    this.isActive = true;
-    refs.startBtnEl.disabled = true;
+    getElem('button[data-start]').disabled = true;
     intervalId = setInterval(() => {
       const currentTime = Date.now();
       const chooseTime = dateChoose.selectedDates[0].getTime();
-      const deltaTime = chooseTime - currentTime;
-      console.log(deltaTime);
-      const { days, hours, minutes, seconds } = convertMs(deltaTime);
-      //console.log(`${days}:${hours}:${minutes}:${seconds}`);
-
-      // updateTimer(convertMs(deltaTime));
+      const ms = chooseTime - currentTime;
+      if (ms <= 0) {
+        Notiflix.Notify.success('Time is out!');
+        clearInterval(intervalId);
+        return;
+      }
+      updateTimer(convertMs(ms));
     }, 1000);
   },
 };
 
-//timer.start();
-
-refs.startBtnEl.addEventListener('click', () => {
+getElem('button[data-start]').addEventListener('click', () => {
   timer.start();
 });
 
 function updateTimer({ days, hours, minutes, seconds }) {
-  refs.daysEl.textContent = days;
-  refs.hoursEl.textContent = hours;
-  refs.minutesEl.textContent = minutes;
-  refs.secondsEl.textContent = seconds;
+  getElem('.value[data-days]').textContent = days;
+  getElem('.value[data-hours]').textContent = hours;
+  getElem('.value[data-minutes]').textContent = minutes;
+  getElem('.value[data-seconds]').textContent = seconds;
 }
 
 function addLeadingZero(value) {
@@ -91,5 +79,10 @@ function convertMs(ms) {
     Math.floor((((ms % day) % hour) % minute) / second)
   );
 
-  return { days, hours, minutes, seconds };
+  return {
+    days,
+    hours,
+    minutes,
+    seconds,
+  };
 }
