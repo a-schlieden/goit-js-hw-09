@@ -74,7 +74,7 @@ function convertMs(ms) {
   const hours = addLeadingZero(Math.floor((ms % day) / hour));
   // Remaining minutes
   const minutes = addLeadingZero(Math.floor(((ms % day) % hour) / minute));
-  // Remaining seconds
+  // Remaining second
   const seconds = addLeadingZero(
     Math.floor((((ms % day) % hour) % minute) / second)
   );
